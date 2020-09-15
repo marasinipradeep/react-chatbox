@@ -9,6 +9,7 @@ const {addUser, removeUser, getUser, getUserInRoom} = require('./users')
 const PORT= process.env.PORT || 8080
 
 const router = require('./router');
+const users = require('./users');
 
 //Set up socket.io (Refer https://socekt.io/docs/#Using-with-Node-http-server)
 //Socket used for real time application because http are slow and used to serve websites
@@ -32,6 +33,9 @@ io.on('connection',(socket)=>{
       //Join joins user in room
       socket.join(user.room);
 
+      //
+      io.to(user.room).emit('roomData',{room:user.room,users:getUserInRoom(user.room)})
+
       callback();
     });
 
@@ -40,7 +44,11 @@ io.on('connection',(socket)=>{
 
         const user =getUser(socket.id);
 
+      
         io.to(user.room).emit('message',{user:user.name,text:message})
+
+         //When the user leaves we can send the new messge
+         io.to(user.room).emit('roomData',{roomm:user.room,users:getUserInRoom(user.room)})
 
         //Call callback right here so that they can do somethig after the message is send on the front end
         callback();
