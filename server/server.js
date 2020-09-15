@@ -15,6 +15,14 @@ const io=socketio(server);
 
 io.on('connection',(socket)=>{
     console.log('We have a new connection!!!');
+    //first string should be same exact as front end 'join' then call back function.Something that happens with join
+    socket.on('join',({name,room},callback)=>{
+        console.log(name,room)
+       // const error = true;
+        // if(error){
+        //     callback({error:"error"})
+        // }
+    })
 
     socket.on('disconnect',()=>{
         console.log("user has left");
