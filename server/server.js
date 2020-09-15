@@ -1,6 +1,9 @@
 const express =require('express');
 const socketio = require("socket.io");
 const http = require("http");
+const cors = require("cors");
+
+const {addUser, removeUser, getUser, getUserInRoom} = require('./users')
 
 
 const PORT= process.env.PORT || 8080
@@ -14,14 +17,33 @@ const server =http.createServer(app);
 const io=socketio(server);
 
 io.on('connection',(socket)=>{
-    console.log('We have a new connection!!!');
     //first string should be same exact as front end 'join' then call back function.Something that happens with join
     socket.on('join',({name,room},callback)=>{
-        console.log(name,room)
-       // const error = true;
-        // if(error){
-        //     callback({error:"error"})
-        // }
+      const {error, user} =addUser({id:socket.id,name,room});
+      if(error) return callback(error);
+
+      //Focusing on system generated messages
+      socket.emit('message', {user:'admin',text:`${user.name}, welcome to the room ${user.room}`})
+
+      //Broadcast Sends message to everyone besides that user
+      socket.broadcast.to(user.room).emit('message',{user:'admin',text:`${user.name},has joined! `})
+
+
+      //Join joins user in room
+      socket.join(user.room);
+
+      callback();
+    });
+
+    //Events for user generated messages 
+    socket.on('sendMessage', (message,callback)=>{
+
+        const user =getUser(socket.id);
+
+        io.to(user.room).emit('message',{user:user.name,text:message})
+
+        //Call callback right here so that they can do somethig after the message is send on the front end
+        callback();
     })
 
     socket.on('disconnect',()=>{
@@ -30,6 +52,7 @@ io.on('connection',(socket)=>{
 })
 
 app.use(router);
+app.use(cors());
 
 server.listen(PORT,()=>{
     console.log(`Server has started on port ${PORT}`)

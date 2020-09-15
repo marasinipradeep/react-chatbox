@@ -30,6 +30,9 @@ export default function Chat({ location }) {
 
     }, [ENDPOINT, location.search])
 
+
+    //Second one handling the messages can use useEffect as much as you want.
+
     //The use effect is hook that lets you perform side effects function components
     //This is equivalent to componentDisMount and componentDidUpdate
     //Have to use cleanup because we need to know when actually a users disconnect
