@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import io from 'socket.io-client';
 
+import "./Chat.css"
+
 let socket;
 
 
@@ -9,7 +11,14 @@ export default function Chat({ location }) {
 
     const [name, setName] = useState('');
     const [room, setRoom] = useState('');
+    const [message, setMessage] = useState('');
+    const [messages, setMessages] = useState([]);
     const ENDPOINT = 'localhost:8080';
+
+
+    //The use effect is hook that lets you perform side effects function components
+    //This is equivalent to componentDisMount and componentDidUpdate
+    //Have to use cleanup because we need to know when actually a users disconnect
 
     useEffect(() => {
         const { name, room } = queryString.parse(location.search);
@@ -23,7 +32,7 @@ export default function Chat({ location }) {
         });
         //have to finish with return this is used for unmounting
 
-        return ()=>{
+        return () => {
             socket.emit('disconnect');
             socket.off();
         }
@@ -33,10 +42,31 @@ export default function Chat({ location }) {
 
     //Second one handling the messages can use useEffect as much as you want.
 
-    //The use effect is hook that lets you perform side effects function components
-    //This is equivalent to componentDisMount and componentDidUpdate
-    //Have to use cleanup because we need to know when actually a users disconnect
+    useEffect(() => {
+        socket.on('message', (message) => {
+            setMessages([...messages, message])
+
+        })
+    }, [messages])
+
+
+    const sendMessage = (event) => {
+        event.preventDefault();
+        if(message){
+            //clear message
+            socket.emit('sendMessage',message,()=>setMessage(''));
+        }
+    }
+
+    console.log(message,messages);
+
     return (
-        <h1>Chat</h1>
+        <div className="outerContainer">
+            <div className="container">
+                <InfoBar/>
+                {/* <input value={message} onChange={(event) => setMessage(event.target.value)} onKeyPress={event => event.key === 'Enter' ? sendMessage(event) : null}></input> */}
+            </div>
+        </div>
+
     )
 }
