@@ -66,8 +66,9 @@ export default function Chat({ location }) {
         <div className="outerContainer">
             <div className="container">
                 <InfoBar room={room}/>
+                <Messages messages={messages}></Messages>
                 <Input message={message} setMessage={setMessage} sendMessage={sendMessage}/>
-                {/* <input value={message} onChange={(event) => setMessage(event.target.value)} onKeyPress={event => event.key === 'Enter' ? sendMessage(event) : null}></input> */}
+               
             </div>
         </div>
 
